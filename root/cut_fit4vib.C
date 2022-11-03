@@ -9,11 +9,15 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <stdio.h>
+
 using std::string;
+using std::cout;
+using std::endl;
 
 int cut_fit4vib(int NPicture){
 	string csvpath_s = "fitdata4vib.csv";
-	char* csvpath = csvpath_s.c_str();
+	const char* csvpath = csvpath_s.c_str();
 	string pdfname = "cut_fit4vib.pdf";
 	string pdfpathS = pdfname + "[";
 	string pdfpath = pdfname;
@@ -24,7 +28,7 @@ int cut_fit4vib(int NPicture){
 
 	TCanvas * c1 = new TCanvas("c1");
 	c1->cd();
-	char* fname = pdfpathS.c_str();
+	const char* fname = pdfpathS.c_str();
 	c1->Print(fname, "pdf");
 	fname = pdfpath.c_str();
 
