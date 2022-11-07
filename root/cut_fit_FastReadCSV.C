@@ -100,7 +100,7 @@ int cut_fit_FastReadCSV(int shift_X, int shift_Y)
       TTree *t = new TTree("t","pixel distance");
       char buffer1[30];
       int flag;
-      double dx, dy;
+      float dx, dy;
       t->Branch("dx",&dx,"dx/F");
       t->Branch("dy",&dy,"dy/F");
       t->Branch("flag",&flag,"flag/I");
