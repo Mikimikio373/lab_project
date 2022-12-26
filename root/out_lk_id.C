@@ -26,7 +26,7 @@ void out_lk_id(const char *ref, const char* comp, const char* output1, const cha
     const int entries_r = nt_ref->GetEntries();
     std::cout << "original entries:" << entries_r << std::endl;
     int id;
-    nt_ref->SetBranchAddress("id1",&id);
+    nt_ref->SetBranchAddress("id0",&id);
     std::vector<int> id_ref;
     for (int i = 0; i < entries_r; i++)
     {
@@ -43,7 +43,7 @@ void out_lk_id(const char *ref, const char* comp, const char* output1, const cha
     TTree *nt_comp = (TTree*)f2->Get("nt");
     const int entries_c = nt_comp->GetEntries();
     std::cout << "original entries" << entries_c << std::endl;
-    nt_comp->SetBranchAddress("id1",&id);
+    nt_comp->SetBranchAddress("id0",&id);
     std::vector<int> id_comp;
     for (int i = 0; i < entries_c; i++)
     {
