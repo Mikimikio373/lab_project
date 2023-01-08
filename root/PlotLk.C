@@ -1,40 +1,44 @@
-// 2022/4/12
-// minami edided
+// 2022/12/02
+// minami completely revised for root ver.6
+
+#include <iostream>
+#include <stdio.h>
+
+#include <TROOT.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TCut.h>
+#include <TMath.h>
+
+using std::cout;
+using std::endl;
 
 void logon();
 
-void PlotLk(const char* rootfile="" ){
+void PlotLk(std::string rootfile){
+  logon();
 
-    logon();
+  TFile *f = new TFile(rootfile.c_str());
+  TTree * nt = (TTree*)f->Get("nt");
 
-    char *file_ex = strrchr(rootfile,'.');
-
-  if(strcmp(file_ex, ".root") == 0){
-    cerr << "[PlotBt] Open ROOTfile: " << rootfile << endl;
-    TFile * f = new TFile(rootfile);
-    }else{
-    cerr << "[PlotBt] Error: Please Input *.root " << endl;
-    exit(1);
-  }
-
-  //  nt->Print();
-  cerr << "[PlotBt] ver2011 format." << endl;
-  cerr << "[PlotBt] #ofTrk: " << nt->GetEntries() << endl;
-
-
-  char fname[100];
-  sprintf(fname,"PlotLk_%s.pdf",rootfile);
+  std::string fname = "PlotLk_" + rootfile + ".pdf";
 
   TCanvas * c1 = new TCanvas("c1");
   c1->cd();
-  sprintf(fname,"PlotLk_%s.pdf[",rootfile);
-  c1->Print(fname,"pdf");  //Open pdf file
-  sprintf(fname,"PlotLk_%s.pdf",rootfile);
+  fname = "PlotLk_" + rootfile + ".pdf[";
+  c1->Print(fname.c_str(),"pdf");  //Open pdf file
+  fname = "PlotLk_" + rootfile + ".pdf";
 
+  TH1D *xtemp = new TH1D("xtemp","xtemp",100,1,1);
   nt->Draw("x0>>xtemp","","goff");
-  const float MeanX = xtemp->GetMean();
+  double MeanX = xtemp->GetMean();
+  TH1D *ytemp = new TH1D("ytemp","ytemp",100,1,1);
   nt->Draw("y0>>ytemp","","goff");
-  const float MeanY = ytemp->GetMean();
+  double MeanY = ytemp->GetMean();
 
   //
   //1. position
@@ -49,9 +53,10 @@ void PlotLk(const char* rootfile="" ){
   position->GetZaxis()->SetTitle("/mm^{2}");
   nt->Draw("y0:x0 >> position","","colz");
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
   //projection
+  gStyle->SetOptStat("e");
   c1->Divide(2,2);
   c1->cd(1);
   c1->GetPad(1)->SetRightMargin(0.17);
@@ -70,25 +75,27 @@ void PlotLk(const char* rootfile="" ){
   position->ProjectionX()->Draw();
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
   delete position;
 
   //y1:x1
+  gStyle->SetOptStat("e");
   nt->Draw("x1>>xtemp","","goff");
-  const float MeanX = xtemp->GetMean();
+  MeanX = xtemp->GetMean();
   nt->Draw("y1>>ytemp","","goff");
-  const float MeanY = ytemp->GetMean();
-  TH2F * position = new TH2F("position","position",135,MeanX-67500,MeanX+67500,100,MeanY-50000,MeanY+50000);
+  MeanY = ytemp->GetMean();
+  position = new TH2F("position","position",135,MeanX-67500,MeanX+67500,100,MeanY-50000,MeanY+50000);
   position->SetTitle("y1:x1");
   position->GetXaxis()->SetTitle("X[#mum]");
   position->GetYaxis()->SetTitle("Y[#mum]");
   position->GetZaxis()->SetTitle("/mm^{2}");
   nt->Draw("y1:x1 >> position","","colz");
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
   
   //projection
+  gStyle->SetOptStat("e");
   c1->Divide(2,2);
   c1->cd(1);
   c1->GetPad(1)->SetRightMargin(0.17);
@@ -107,7 +114,7 @@ void PlotLk(const char* rootfile="" ){
   position->ProjectionX()->Draw();
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //
@@ -124,7 +131,7 @@ void PlotLk(const char* rootfile="" ){
   angle->GetYaxis()->SetTitle("ay");
   angle->GetZaxis()->SetTitle("/(0.01rad)^{2}");
   nt->Draw("ay0:ax0 >> angle","","colz");
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //projection
@@ -153,7 +160,7 @@ void PlotLk(const char* rootfile="" ){
   TH1F * htan = new TH1F("htan",";#sqrt{ax0^{2}+ay0^{2}};/0.01",300,0.,3.);
   nt->Draw("sqrt(ax0^2+ay0^2) >>htan");
   c1->Update();
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   delete angle;
   delete htan;
 
@@ -162,13 +169,13 @@ void PlotLk(const char* rootfile="" ){
   c1->Clear();
   c1->SetRightMargin(0.2);
   c1->SetLeftMargin(0.2);
-  TH2F * angle = new TH2F("angle","angle",400,-2.0,2.0,400,-2.0,2.0);
+  angle = new TH2F("angle","angle",400,-2.0,2.0,400,-2.0,2.0);
   angle->SetTitle("ay1:ax1");
   angle->GetXaxis()->SetTitle("ax");
   angle->GetYaxis()->SetTitle("ay");
   angle->GetZaxis()->SetTitle("/(0.01rad)^{2}");
   nt->Draw("ay1:ax1 >> angle","","colz");
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //projection
@@ -194,10 +201,10 @@ void PlotLk(const char* rootfile="" ){
   c1->Update();
 
   c1->cd(4);
-  TH1F * htan = new TH1F("htan",";#sqrt{ax1^{2}+ay1^{2}};/0.01",300,0.,3.);
+  htan = new TH1F("htan",";#sqrt{ax1^{2}+ay1^{2}};/0.01",300,0.,3.);
   nt->Draw("sqrt(ax1^2+ay1^2) >>htan");
   c1->Update();
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //
@@ -209,7 +216,7 @@ void PlotLk(const char* rootfile="" ){
   dxy->GetXaxis()->SetTitle("dx");
   dxy->GetYaxis()->SetTitle("dy");
   nt->Draw("dy:dx >> dxy", "", "colz");
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //projection
@@ -231,7 +238,7 @@ void PlotLk(const char* rootfile="" ){
   dxy->ProjectionX()->Draw();
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   c1->Divide(2,1);
@@ -253,7 +260,7 @@ void PlotLk(const char* rootfile="" ){
   dxy3->SetMinimum(0);
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //
@@ -265,7 +272,7 @@ void PlotLk(const char* rootfile="" ){
   daxy->GetXaxis()->SetTitle("dax");
   daxy->GetYaxis()->SetTitle("day");
   nt->Draw("ay0-ay1:ax0-ax1 >> daxy", "", "colz");
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   //projection
@@ -291,7 +298,7 @@ void PlotLk(const char* rootfile="" ){
   TH1F * dangtan = new TH1F("dtan",";#sqrt{dax^{2}+day^{2}};/0.01",100,0.,1.0);
   nt->Draw("sqrt((ax0-ax1)^2+(ay0-ay1)^2) >>dangtan");
   c1->Update();
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
   c1->Divide(2,1);
@@ -313,8 +320,10 @@ void PlotLk(const char* rootfile="" ){
   daxy3->SetMinimum(0);
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
+
+  cout << "test0" << endl;
 
   //
   //ph
@@ -338,18 +347,18 @@ void PlotLk(const char* rootfile="" ){
 
   for(int i=0;i<4;i++){
     //angle range
-    angcutmin = 0.5*i;
-    angcutmax = 0.5*i+0.1;
+    angcutmin = (double)0.5*i;
+    angcutmax = (double)0.5*i+0.1;
 
     sprintf(angcut,"ax^2+ay^2>=%.1f^2 && ax^2+ay^2<%.1f^2",angcutmin,angcutmax);
     TCut cut2 = angcut;
-    cerr << angcut << endl;
+    cout << angcut << endl;
 
     hph0[i] = new TH1D(Form("ph0_%d",i),cut2,32,0.5,32.5);
     hph0[i]->GetXaxis()->SetTitle("PH0");
     hph00[i] = new TH1D(Form("ph00_%d",i),cut2,16,0.5,16.5);
     hph00[i]->GetXaxis()->SetTitle("PH00");
-    hph01[i] = new TH1D(Form("ph01_%d",i),cut2,16,0.5,16.5s);
+    hph01[i] = new TH1D(Form("ph01_%d",i),cut2,16,0.5,16.5);
     hph01[i]->GetXaxis()->SetTitle("PH01");
 
     hvph0[i] = new TH1D(Form("vph0_%d",i),cut2,600,0,600);
@@ -397,7 +406,7 @@ void PlotLk(const char* rootfile="" ){
   int entries = nt->GetEntries();
 
   for(int i=0;i<entries;i++){
-    if(i%100000==0)cerr << i  << "/" << entries << "\r";
+    if(i%100000==0)cout << i  << "/" << entries << "\r";
     nt->GetEntry(i);
 
     //cut2
@@ -424,7 +433,7 @@ void PlotLk(const char* rootfile="" ){
     }
 
   }
-  cerr << i  << "/" << entries << endl;
+  cout << entries  << "/" << entries << endl;
 
 
   //Draw
@@ -464,7 +473,7 @@ void PlotLk(const char* rootfile="" ){
     hvph01[i]->Draw();
 
     c1->Update();
-    c1->Print(fname);
+    c1->Print(fname.c_str());
     c1->Clear();
 
     //ph1
@@ -502,7 +511,7 @@ void PlotLk(const char* rootfile="" ){
     hvph11[i]->Draw();
 
     c1->Update();
-    c1->Print(fname);
+    c1->Print(fname.c_str());
     c1->Clear();
 
     delete hph0[i];
@@ -542,7 +551,7 @@ void PlotLk(const char* rootfile="" ){
   nt->Draw("ph0%10000:sqrt(ax0^2+ay0^2) >> hvph0vs0","","colz");
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
   
   //1
@@ -563,16 +572,16 @@ void PlotLk(const char* rootfile="" ){
   nt->Draw("ph1%10000:sqrt(ax0^2+ay0^2) >> hvph1vs0","","colz");
   c1->Update();
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
   c1->Clear();
 
 
 
 
   //close pdf
-  sprintf(fname,"PlotLk_%s.pdf]",rootfile);
+  fname = "PlotLk_" + rootfile + ".pdf]";
 
-  c1->Print(fname);
+  c1->Print(fname.c_str());
 }
 
 void logon()
